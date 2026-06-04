@@ -1,0 +1,19 @@
+{
+  "name": "symmetry-repair",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1",
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.1.0"
+  }
+}
