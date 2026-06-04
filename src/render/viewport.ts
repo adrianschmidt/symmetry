@@ -26,6 +26,22 @@ export class Viewport {
   }
 }
 
+/**
+ * Map a pointer event's client coordinates to world space, relative to the
+ * canvas's displayed box. Subtracting the rect offset (and building the
+ * Viewport from the same displayed box) keeps pointer mapping consistent with
+ * what is drawn, even when the canvas is not flush with the window — e.g. on
+ * mobile where CSS `100vh` differs from `window.innerHeight` due to browser chrome.
+ */
+export function clientToWorld(
+  vp: Viewport,
+  rect: { left: number; top: number },
+  clientX: number,
+  clientY: number,
+): Vec2 {
+  return vp.screenToWorld({ x: clientX - rect.left, y: clientY - rect.top });
+}
+
 /** Nearest instance to a world point within `radius` world units, else null. */
 export function hitTest(instances: Instance[], world: Vec2, radius: number): Instance | null {
   let best: Instance | null = null;

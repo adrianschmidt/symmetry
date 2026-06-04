@@ -1,5 +1,5 @@
 import { initState, recordRepair, nextPuzzle, type AppState } from "./state";
-import { Viewport, hitTest } from "../render/viewport";
+import { Viewport, hitTest, clientToWorld } from "../render/viewport";
 import { drawPattern, drawInstance } from "../render/renderer";
 import { runLoop, tweenValue, lerp, type Tween } from "../render/animation";
 import { isInstanceCorrect } from "../core/symmetry";
@@ -29,14 +29,22 @@ function fitOverview(): void {
 
 function resize(): void {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
+  // Size from the canvas's actual displayed box, NOT window.innerWidth/Height.
+  // On mobile the canvas (CSS 100dvw/100dvh) differs from window.innerHeight due
+  // to dynamic browser chrome; using the displayed box keeps what we draw and
+  // where we hit-test in the same coordinate space.
+  const w = canvas.clientWidth || window.innerWidth;
+  const h = canvas.clientHeight || window.innerHeight;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  vp = new Viewport(window.innerWidth, window.innerHeight);
+  vp = new Viewport(w, h);
   fitOverview();
   render();
 }
 window.addEventListener("resize", resize);
+// The visual viewport changes when mobile browser chrome shows/hides; re-sync then too.
+window.visualViewport?.addEventListener("resize", resize);
 
 const hud = createHud(hudRoot, {
   onHint: () => {
@@ -88,8 +96,11 @@ function changeLevel(level: number): void {
 // --- Pointer: tap a still-broken defect to zoom in and repair it ---
 canvas.addEventListener("pointerdown", (e) => {
   if (active) return;
-  const world = vp.screenToWorld({ x: e.clientX, y: e.clientY });
-  const hit = hitTest(state.puzzle.instances, world, 34);
+  const rect = canvas.getBoundingClientRect();
+  const world = clientToWorld(vp, rect, e.clientX, e.clientY);
+  // Finger-friendly target: at least ~24 CSS px around a motif, in world units.
+  const tol = Math.max(34, 24 / vp.zoom);
+  const hit = hitTest(state.puzzle.instances, world, tol);
   if (hit && !isInstanceCorrect(hit, state.puzzle.pattern.layers[hit.layerIndex]!)) {
     zoomTo(hit);
   }

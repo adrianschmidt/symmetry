@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Viewport, hitTest } from "../src/render/viewport";
+import { Viewport, hitTest, clientToWorld } from "../src/render/viewport";
 import type { Instance } from "../src/core/types";
 
 function inst(layerIndex: number, index: number, x: number, y: number): Instance {
@@ -27,5 +27,26 @@ describe("hitTest", () => {
   });
   it("returns null when nothing is within radius", () => {
     expect(hitTest(instances, { x: 500, y: 500 }, 30)).toBeNull();
+  });
+});
+
+describe("clientToWorld", () => {
+  it("subtracts the canvas rect offset before mapping", () => {
+    const vp = new Viewport(800, 600);
+    vp.setView({ x: 0, y: 0 }, 1);
+    // A pointer at the canvas's visual center (offset + width/2, height/2) is world origin.
+    const w = clientToWorld(vp, { left: 30, top: 40 }, 30 + 400, 40 + 300);
+    expect(w.x).toBeCloseTo(0, 6);
+    expect(w.y).toBeCloseTo(0, 6);
+  });
+
+  it("round-trips with worldToScreen plus the rect offset", () => {
+    const vp = new Viewport(800, 600);
+    vp.setView({ x: 10, y: -5 }, 2);
+    const rect = { left: 12, top: 7 };
+    const s = vp.worldToScreen({ x: 33, y: -9 });
+    const w = clientToWorld(vp, rect, s.x + rect.left, s.y + rect.top);
+    expect(w.x).toBeCloseTo(33, 6);
+    expect(w.y).toBeCloseTo(-9, 6);
   });
 });
