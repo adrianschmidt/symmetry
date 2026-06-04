@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { applyControl, isRepaired } from "../src/ui/controls";
+import { applyControl, isRepaired, isWithinSnap } from "../src/ui/controls";
 import type { MotifAttributes } from "../src/core/types";
 
 const canon: MotifAttributes = { kind: "petal", hue: 200, spin: 1.0, scale: 1, mirrored: false };
@@ -28,5 +28,10 @@ describe("controls", () => {
   it("toggling mirror flips chirality", () => {
     const next = applyControl({ ...canon, mirrored: true }, { axis: "mirrored", delta: 1 });
     expect(next.mirrored).toBe(false);
+  });
+
+  it("isWithinSnap accepts near-canonical and rejects a fresh corruption", () => {
+    expect(isWithinSnap({ ...canon, hue: 206, spin: 1.05 }, canon)).toBe(true);
+    expect(isWithinSnap({ ...canon, hue: 250 }, canon)).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 import type { Axis, MotifAttributes, MotifKind } from "../core/types";
 import { MOTIF_KINDS } from "../core/types";
 import { attributesMatch } from "../core/symmetry";
-import { normalizeAngle } from "../core/geometry";
+import { normalizeAngle, angleDistance, hueDistance } from "../core/geometry";
 
 export interface ControlInput { axis: Axis; delta: number; }
 
@@ -27,4 +27,21 @@ export function isRepaired(cur: MotifAttributes, canonical: MotifAttributes, _ax
   // attributesMatch already checks every axis with the same tolerances used for
   // verification, so a full match is sufficient (and stricter is fine).
   return attributesMatch(cur, canonical);
+}
+
+// Snap tolerances are >= one control step (see main.ts step sizes) so any defect
+// is always reachable by stepping; once within range, the app snaps to exact canonical.
+const HUE_SNAP = 12;    // degrees
+const SPIN_SNAP = 0.15; // radians
+const SCALE_SNAP = 0.08;
+
+/** True when every axis is within magnetic snap range of canonical. */
+export function isWithinSnap(cur: MotifAttributes, canonical: MotifAttributes): boolean {
+  return (
+    cur.kind === canonical.kind &&
+    cur.mirrored === canonical.mirrored &&
+    hueDistance(cur.hue, canonical.hue) <= HUE_SNAP &&
+    angleDistance(cur.spin, canonical.spin) <= SPIN_SNAP &&
+    Math.abs(cur.scale - canonical.scale) <= SCALE_SNAP
+  );
 }
