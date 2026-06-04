@@ -1,0 +1,1 @@
+:root{--lightningcss-light: ;--lightningcss-dark:initial;color-scheme:dark}html,body{background:#0e1014;height:100%;margin:0;overflow:hidden}#board{touch-action:none;width:100dvw;height:100dvh;display:block}#hud{pointer-events:none;position:fixed;inset:0}#hud>*{pointer-events:auto}
