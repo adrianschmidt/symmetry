@@ -1,7 +1,6 @@
 export interface HudCallbacks {
   onHint: () => void;
   onToggleCount: () => void;
-  onLevel: (level: number) => void;
 }
 
 export interface Hud {

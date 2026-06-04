@@ -5,7 +5,7 @@ import { createHud } from "../src/ui/hud";
 describe("hud", () => {
   it("shows the remaining count and hides it when disabled", () => {
     const root = document.createElement("div");
-    const hud = createHud(root, { onHint: () => {}, onToggleCount: () => {}, onLevel: () => {} });
+    const hud = createHud(root, { onHint: () => {}, onToggleCount: () => {} });
     hud.setCount(3, true);
     expect(root.querySelector("[data-count]")!.textContent).toContain("3");
     hud.setCount(3, false);
@@ -15,7 +15,7 @@ describe("hud", () => {
   it("fires onHint when the hint button is clicked", () => {
     const root = document.createElement("div");
     const onHint = vi.fn();
-    createHud(root, { onHint, onToggleCount: () => {}, onLevel: () => {} });
+    createHud(root, { onHint, onToggleCount: () => {} });
     (root.querySelector("[data-hint]") as HTMLButtonElement).click();
     expect(onHint).toHaveBeenCalledOnce();
   });

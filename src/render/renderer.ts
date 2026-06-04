@@ -1,4 +1,4 @@
-import type { Instance, Pattern } from "../core/types";
+import type { Instance } from "../core/types";
 import { motifVertices } from "./shapes";
 
 const MOTIF_RADIUS = 26; // base world radius of a motif at scale 1
@@ -29,10 +29,4 @@ export function drawInstance(ctx: CanvasRenderingContext2D, inst: Instance, pop 
 
 export function drawPattern(ctx: CanvasRenderingContext2D, instances: Instance[], pop = 0): void {
   for (const inst of instances) drawInstance(ctx, inst, pop);
-}
-
-/** Convenience used by the app to draw a full puzzle's instances. */
-export function drawPuzzle(ctx: CanvasRenderingContext2D, pattern: Pattern, instances: Instance[], pop = 0): void {
-  void pattern;
-  drawPattern(ctx, instances, pop);
 }

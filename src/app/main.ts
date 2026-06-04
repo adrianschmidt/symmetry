@@ -1,7 +1,7 @@
 import { initState, recordRepair, nextPuzzle, type AppState } from "./state";
 import { Viewport, hitTest } from "../render/viewport";
-import { drawPattern } from "../render/renderer";
-import { runLoop, tweenValue, type Tween } from "../render/animation";
+import { drawPattern, drawInstance } from "../render/renderer";
+import { runLoop, tweenValue, lerp, type Tween } from "../render/animation";
 import { isInstanceCorrect } from "../core/symmetry";
 import { remainingCount, isComplete } from "../core/puzzle";
 import { MAX_LEVEL } from "../core/difficulty";
@@ -19,6 +19,7 @@ let vp = new Viewport(window.innerWidth, window.innerHeight);
 let active: Instance | null = null;          // defect being repaired (zoomed in)
 let glow: { x: number; y: number; until: number } | null = null;
 let controlBar: HTMLElement | null = null;
+let sweep: { x: number } | null = null;     // active completion shine: world-x of the sweep line
 
 function fitOverview(): void {
   const r = state.puzzle.pattern.radius;
@@ -46,7 +47,6 @@ const hud = createHud(hudRoot, {
     state.session.showCount = !state.session.showCount;
     refreshHud();
   },
-  onLevel: changeLevel,
 });
 
 function refreshHud(): void {
@@ -168,20 +168,44 @@ function animateView(
 
 function celebrate(): void {
   const start = performance.now();
+  const { center, radius } = state.puzzle.pattern;
+  const fromX = center.x - radius - 60;
+  const toX = center.x + radius + 60;
   runLoop((now) => {
     const p = Math.min(1, (now - start) / 1200);
-    render(p);
+    sweep = { x: lerp(fromX, toX, p) };
+    render();
     return p >= 1;
-  }, () => { nextPuzzle(state); fitOverview(); syncLevelLabel(); refreshHud(); render(); });
+  }, () => { sweep = null; nextPuzzle(state); fitOverview(); syncLevelLabel(); refreshHud(); render(); });
 }
 
-function render(pop = 0): void {
+function render(): void {
   ctx.clearRect(0, 0, vp.width, vp.height);
   ctx.save();
   ctx.translate(vp.width / 2, vp.height / 2);
   ctx.scale(vp.zoom, vp.zoom);
   ctx.translate(-vp.center.x, -vp.center.y);
-  drawPattern(ctx, state.puzzle.instances, pop);
+  if (sweep) {
+    // A single shine sweeps across; the punched-up colors follow in its wake.
+    const BAND = 70; // world-unit softness just ahead of the shine line
+    for (const inst of state.puzzle.instances) {
+      const ahead = inst.position.x - sweep.x;
+      const pop = ahead <= 0 ? 1 : Math.max(0, 1 - ahead / BAND);
+      drawInstance(ctx, inst, pop);
+    }
+    const reach = state.puzzle.pattern.radius + 40;
+    const grad = ctx.createLinearGradient(sweep.x - 34, 0, sweep.x + 8, 0);
+    grad.addColorStop(0, "rgba(255,255,255,0)");
+    grad.addColorStop(1, "rgba(255,255,255,0.85)");
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 10 / vp.zoom;
+    ctx.beginPath();
+    ctx.moveTo(sweep.x, state.puzzle.pattern.center.y - reach);
+    ctx.lineTo(sweep.x, state.puzzle.pattern.center.y + reach);
+    ctx.stroke();
+  } else {
+    drawPattern(ctx, state.puzzle.instances, 0);
+  }
   if (glow && performance.now() < glow.until) {
     ctx.beginPath();
     ctx.arc(glow.x, glow.y, 44, 0, Math.PI * 2);
