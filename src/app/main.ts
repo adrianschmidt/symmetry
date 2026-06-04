@@ -15,6 +15,16 @@ const ctx = canvas.getContext("2d")!;
 const hudRoot = document.getElementById("hud")!;
 const state: AppState = initState();
 
+// Build-time version label, injected by the deploy workflows (prod: run number;
+// PR preview: PR number + run number). Lets you confirm which build is live.
+const appVersion = import.meta.env.VITE_APP_VERSION as string | undefined;
+if (appVersion) {
+  const versionEl = document.createElement("div");
+  versionEl.className = "app-version";
+  versionEl.textContent = appVersion;
+  document.body.appendChild(versionEl);
+}
+
 let vp = new Viewport(window.innerWidth, window.innerHeight);
 let active: Instance | null = null;          // defect being repaired (zoomed in)
 let glow: { x: number; y: number; until: number } | null = null;

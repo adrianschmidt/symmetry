@@ -29,6 +29,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE_PATH: /symmetry/dev/
+          VITE_APP_VERSION: "PR #${{ github.event.pull_request.number }} (run ${{ github.run_number }})"
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
