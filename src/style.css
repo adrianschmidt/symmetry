@@ -1,0 +1,17 @@
+:root { color-scheme: dark; }
+html, body { margin: 0; height: 100%; background: #0e1014; overflow: hidden; }
+/* Dynamic viewport units (dvw/dvh) track mobile browser chrome so the canvas box
+   matches the visible area; vw/vh are the fallback for older browsers. */
+#board { display: block; width: 100vw; height: 100vh; width: 100dvw; height: 100dvh; touch-action: none; }
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#hud > * { pointer-events: auto; }
+.app-version {
+  position: fixed;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  font: 500 11px system-ui;
+  color: #6c7086;
+  pointer-events: none;
+}

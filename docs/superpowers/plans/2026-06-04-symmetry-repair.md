@@ -1,5 +1,7 @@
 # Symmetry Repair Implementation Plan
 
+> ✅ **This plan was fully executed — v1 is built.** For current state and next steps see [STATUS.md](../../../STATUS.md). Kept for reference.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build v1 of Symmetry Repair — a calm, endless visual puzzle where you find subtly corrupted elements in a layered-symmetry pattern and zoom in to transform them back into harmony, all playable without engaging language.
